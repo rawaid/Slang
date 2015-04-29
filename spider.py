@@ -1,6 +1,11 @@
 import pylast
 from PyLyrics import *
 import base64
+import os
+import errno
+import codecs
+import pkgutil
+from pyechonest import config
 # LYRICSnMUSIC Api Key = 29af6fae353173522c2aab3c3e655d
 def spider():
     #Last.FM API:
@@ -12,15 +17,14 @@ def spider():
     decoded = str(decoded)
     decoded = decoded[2:-1]
 
-    '''
+
     #EchoNest API:
     config.ECHO_NEST_API_KEY="K9GHS1ZS13C6ASJBH"
-    '''
+
 
     # In order to perform a write operation you need to authenticate yourself
     username = "rawaid"
     password_hash = pylast.md5(decoded)
-
 
 
 
@@ -45,30 +49,89 @@ def spider():
     '''
     artistDict = {}
 
-    for x in range(0, 2):
+    #Getting the slang dictionary, reading from file and creating Dict.
+    slangDict = {}
+    with codecs.open(os.getcwd()+'/data/slang.txt','r','utf-8', errors = 'ignore') as f:
+        for l in f:
+            l = l.strip()
+            for x in range (0, 193):
+                slangDict[x] = l
+            print(slangDict[x])
+    '''
+    for x in range(0, len(artists)):
         #print(artists[x].item)
         artistDict[x] = str(artists[x].item)
-        print(artistDict[x])
+
+        #Creating directories for every artist if they don't yet exist
+        path = os.getcwd()
+        try:
+            os.makedirs(path + '/data' + '/' + artistDict[x])
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
+
+        print(artistDict[x],"'s tracks:")
         count = 0
         track = artists[x].item.get_top_tracks()
         trackDict = {}
+
+        trackCount = 0
+
         for x in range(0, len(track)):
+            trackCount +=1
             trackDict[x] = str(track[x].item)
 
-            count += 1
-            print(trackDict[x])
-
-    print('\n')
+            print(trackCount, trackDict[x])
 
 
-      #  albums = PyLyrics.getAlbums(singer = artistDict[x])
-
-
-    print(PyLyrics.getLyrics(artistDict[1], 'Bound 2'))
+           # count += 1
+            #print(trackDict[x])
 
 
 
-    print('')
+        for x in range(0,len(artists)):
+            artistDict[x] = str(artists[x].item)
+            for j in range(0, len(track)):
+                if artistDict[x] in trackDict[j]:
+                    count += 1
+
+                    file_path = "data/" + artistDict[x] + "/" + str(count) + ".txt"
+                    try:
+                        f = open(file_path, "w", encoding = 'utf-8')
+                    except FileNotFoundError:
+                        pass
+
+                    length = len(artistDict[x])
+                    trackDict[j] = trackDict[j][length +3:]
+                    try:
+                        #print(PyLyrics.getLyrics(artistDict[x], trackDict[j]))
+                        lyrics = str(PyLyrics.getLyrics(artistDict[x], trackDict[j]))
+                        lyrics = lyrics.lower()
+                        lyrics = lyrics.replace("!", "")
+                        lyrics = lyrics.replace(",", "")
+                        lyrics = lyrics.replace(".", "")
+                        lyrics = lyrics.replace("'", "")
+                        lyrics = lyrics.replace("(", "")
+                        lyrics = lyrics.replace(")", "")
+                        lyrics = lyrics.replace("?", "")
+                        lyrics = lyrics.replace('"', "")
+                        lyrics = lyrics.replace(":", "")
+
+                        f.write(lyrics)
+                    except ValueError:
+                        pass
+
+
+        print('')
+
+'''
+
+
+
+
+
+
+
 
 
 
@@ -77,17 +140,13 @@ def spider():
     # type help(pylast.LastFMNetwork) or help(pylast) in a python interpreter to get more help
     # about anything and see examples of how it works
     return
+def make_sure_path_exists():
+    path = os.getcwd()
+    try:
+        os.makedirs(path + '/data')
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
+make_sure_path_exists()
 spider()
-
-'''
- def test_tag_top_artists(self):
-        # Arrange
-        tag = self.network.get_tag("blues")
-
-        # Act
-        artists = tag.get_top_artists(limit=1)
-
-        # Assert
-        self.helper_only_one_thing_in_top_list(artists, pylast.Artist)
-'''
