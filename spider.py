@@ -57,6 +57,18 @@ def spider():
             for x in range (0, 193):
                 slangDict[x] = l
             print(slangDict[x])
+
+    '''
+    #writing all artists to a file
+    file_path = os.getcwd()+ "/data/artists.txt"
+    f = open(file_path, "w", encoding = 'utf-8')
+
+    for i in range(0,len(artists)):
+        artistDict[i] = str(artists[i].item)
+        f.write(artistDict[i]+'\n')
+    '''
+
+
     '''
     for x in range(0, len(artists)):
         #print(artists[x].item)
