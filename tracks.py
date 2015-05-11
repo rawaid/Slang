@@ -74,9 +74,15 @@ def getWords():
             artistDict[x] = 'Run The Jewels'
         print(artistDict[x])
 
+
+
+
+
+
     for i in range(44, len(artistDict)):
         print('writing ' + artistDict[i] + "'s lyrics.")
         tracks(artistDict[i])
+
     '''
     for i in range(0,50):
         try:
